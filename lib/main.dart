@@ -40,8 +40,6 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
 
 
-    var finished = Provider.of<Repo>(context,listen: false).isFinished;
-
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
