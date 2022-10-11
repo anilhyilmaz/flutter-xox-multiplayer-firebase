@@ -1,0 +1,3 @@
+
+var constOsize = 40;
+
