@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutterdeneme/Screens/GridviewBuilder.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);
@@ -20,7 +21,9 @@ class _MainPageState extends State<MainPage> {
             onPressed: () => print("joined game"), child: Text("Join Game")),
         Divider(color: Colors.black,),
         TextButton(
-            onPressed: () => print("Created game"), child: Text("Create Game"))
+            onPressed: () => Navigator
+                .of(context)
+                .pushReplacement(new MaterialPageRoute(builder: (BuildContext context) => GridviewBuilder())), child: Text("Create Game"))
       ],
     );
   }

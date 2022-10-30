@@ -13,29 +13,31 @@ class GridviewBuilder extends StatelessWidget {
     var finished = Provider.of<Repo>(context,listen: false).isFinished;
 
 
-    return Container(
-      height: 300,
-      width: 300,
-      margin: const EdgeInsets.all(10),
-      child: GridView.builder(gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 100,
-          childAspectRatio: 3 / 2,
-          crossAxisSpacing: 5,
-          mainAxisSpacing: 20),itemCount: Provider.of<Repo>(context).mylist.length,itemBuilder: (context,index){
-        return GestureDetector(
-          onTap: ()=>{
-            finished ? print("game finished") : Provider.of<Repo>(context,listen: false).changeText(index),
-          },
-          child: Container(
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-                color: Colors.amber,
-                borderRadius: BorderRadius.circular(15)),
-            child: Text(Provider.of<Repo>(context).mylist[index] ?? " ",style: TextStyle(fontSize: constOsize.toDouble())),
-          ),
-        );
-      },),
-    );
+    return Scaffold(appBar: AppBar(title: Text("Game Screen")),body: Center(
+      child: Container(
+        height: 300,
+        width: 300,
+        margin: const EdgeInsets.all(10),
+        child: GridView.builder(gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 100,
+            childAspectRatio: 3 / 2,
+            crossAxisSpacing: 5,
+            mainAxisSpacing: 20),itemCount: Provider.of<Repo>(context).mylist.length,itemBuilder: (context,index){
+          return GestureDetector(
+            onTap: ()=>{
+              finished ? print("game finished") : Provider.of<Repo>(context,listen: false).changeText(index),
+            },
+            child: Container(
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                  color: Colors.amber,
+                  borderRadius: BorderRadius.circular(15)),
+              child: Text(Provider.of<Repo>(context).mylist[index] ?? " ",style: TextStyle(fontSize: constOsize.toDouble())),
+            ),
+          );
+        },),
+      ),
+    ));
   }
 }
 

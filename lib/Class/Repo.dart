@@ -2,7 +2,7 @@
 import 'package:flutter/cupertino.dart';
 
 class Repo with ChangeNotifier{
-  bool isFinished = false;
+  bool isFinished = true;
   String city = "Hello World";
   //var list = "";
   List mylist = ["","","","","","","","",""];
