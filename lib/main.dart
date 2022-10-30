@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdeneme/Class/Repo.dart';
+import 'package:flutterdeneme/Screens/MainPage.dart';
 import 'package:flutterdeneme/Utils/ConstantStyles.dart';
 import 'package:provider/provider.dart';
 
@@ -48,7 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: const <Widget>[
-            GridviewBuilder(),
+            MainPage(),
           ],
         ),
       ),
