@@ -6,6 +6,7 @@ class Repo with ChangeNotifier{
   String city = "Hello World";
   //var list = "";
   List mylist = ["","","","","","","","",""];
+  String? gameCode;
 
 
    void changeValue(String newValue){

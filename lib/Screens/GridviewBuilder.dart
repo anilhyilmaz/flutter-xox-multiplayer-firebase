@@ -10,6 +10,7 @@ class GridviewBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var finished = Provider.of<Repo>(context, listen: false).isFinished;
+    var gameCode = Provider.of<Repo>(context,listen: false).gameCode;
 
     return Scaffold(
         appBar: AppBar(title: Text("Game Screen")),
@@ -20,7 +21,7 @@ class GridviewBuilder extends StatelessWidget {
           children: [
             Flexible(
               flex: 1,
-              child: Column(children: [Text("Username1: ggg"),Text("Username2: fff")],),
+              child: Column(children: [Text("code: $gameCode"),Text("Username1: ggg"),Text("Username2: fff")],),
             ),
             Flexible(
               flex: 4,

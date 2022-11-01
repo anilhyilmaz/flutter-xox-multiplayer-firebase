@@ -3,11 +3,13 @@ import 'package:flutterdeneme/Class/Repo.dart';
 import 'package:flutterdeneme/Screens/MainPage.dart';
 import 'package:flutterdeneme/Utils/ConstantStyles.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 import 'Screens/GridviewBuilder.dart';
 
-
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(ChangeNotifierProvider<Repo>(
       create: (create) => Repo(), child: const MyApp()));
 }
