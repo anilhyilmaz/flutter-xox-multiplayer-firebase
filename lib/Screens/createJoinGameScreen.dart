@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../Class/Repo.dart';
-import 'GridviewBuilder.dart';
+import '../Utils/CreateRandomID.dart';
+import 'GameScreen.dart';
 
 
 class CreateJoinGameScreen extends StatefulWidget {
@@ -21,7 +23,6 @@ class _CreateJoinGameScreenState extends State<CreateJoinGameScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text("ggg"),
           Padding(
             padding: const EdgeInsets.only(top: 20,left: 45,right: 45),
             child: const TextField(
@@ -43,10 +44,12 @@ class _CreateJoinGameScreenState extends State<CreateJoinGameScreen> {
   }
 
   creategame() async {
-    String id = "123";
+    final FirebaseAuth _auth = FirebaseAuth.instance;
+    String id = createRoomID();
+    final now = DateTime.now();
     try {
       FirebaseFirestore Firestore = FirebaseFirestore.instance;
-      Firestore.collection("news").add({"id": id});
+      Firestore.collection("games").add({"sira":"first_player","board":[2,2,2,2,2,2,2,2,2],"XorO":"X","id": id,"created_time":now,"firstPlayer":_auth.currentUser?.email.toString(),"secondPlayer":null,"gameFinish":"false"});
       Provider.of<Repo>(context,listen: false).gameCode = id;
       Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (BuildContext context) => const GridviewBuilder()));

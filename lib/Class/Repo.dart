@@ -2,17 +2,11 @@
 import 'package:flutter/cupertino.dart';
 
 class Repo with ChangeNotifier{
-  bool isFinished = true;
-  String city = "Hello World";
+  bool isFinished = false;
   //var list = "";
   List mylist = ["","","","","","","","",""];
   String? gameCode;
 
-
-   void changeValue(String newValue){
-    city = newValue;
-    notifyListeners();
-  }
   changeText(int index){
     mylist[index] = "X";
     notifyListeners();

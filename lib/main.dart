@@ -5,7 +5,7 @@ import 'package:flutterdeneme/Utils/ConstantStyles.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-import 'Screens/GridviewBuilder.dart';
+import 'Screens/GameScreen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
