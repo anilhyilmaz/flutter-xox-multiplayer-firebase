@@ -78,7 +78,8 @@ class _GridviewBuilderState extends State<GridviewBuilder> {
                                       {
                                         finished
                                             ? print("game finished")
-                                            : Firestore.collection("games").doc(gameCode).update({"board[$index]":"X"}),
+                                            // : Firestore.collection("games").doc(gameCode).update({"board[$index]":"X"}),
+                                            : print(index),
                                         //update board at index doesnt work atm.
                                       },
                                       child: Container(
@@ -108,6 +109,7 @@ class _GridviewBuilderState extends State<GridviewBuilder> {
     FirebaseFirestore Firestore = FirebaseFirestore.instance;
     var ggg = Firestore.collection("games").snapshots();
     ggg.forEach((element) {
+      print(element.docs[1].data()["XorO"]);
       print(element.docs[1].data()["XorO"]);
     });
     ggg.forEach((element) {

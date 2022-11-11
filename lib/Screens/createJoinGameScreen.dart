@@ -55,15 +55,45 @@ class _CreateJoinGameScreenState extends State<CreateJoinGameScreen> {
   }
 
   creategame() async {
+    var len;
     String id = createRoomID();
     final now = DateTime.now();
     try {
       FirebaseFirestore Firestore = FirebaseFirestore.instance;
       Firestore.collection("games").add({"sira":"first_player","board":[2,2,2,2,2,2,2,2,2],"XorO":"X","id": id,"created_time":now,"firstPlayer":_auth.currentUser?.email.toString(),"secondPlayer":null,"gameFinish":"false"});
-      Provider.of<Repo>(context,listen: false).gameCode = id;
-      Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (BuildContext context) => const GridviewBuilder()));
-      print("game created");
+      var gamesSnapshots = Firestore.collection("games").snapshots();
+      gamesSnapshots.forEach((element) {
+        len = element.docs.length;
+      });
+      gamesSnapshots.forEach((element) {
+        for(int i=0;i<len;i++){
+          if(id == element.docs[i].data()["id"]){
+            print(element.docs[i].data()["id"]);
+              Provider
+                  .of<Repo>(context, listen: false)
+                  .id = element.docs[i].data()["id"];
+              Provider
+                  .of<Repo>(context, listen: false)
+                  .gameCode = element.docs[i].id;
+              Provider
+                  .of<Repo>(context, listen: false)
+                  .firstPlayer = element.docs[i].data()["firstPlayer"];
+              Provider
+                  .of<Repo>(context, listen: false)
+                  .secondPlayer = element.docs[i].data()["secondPlayer"];
+
+              print("gameCodeProvider: ${Provider
+                  .of<Repo>(context, listen: false)
+                  .gameCode}");
+              print("gameIDProvider ${Provider
+                  .of<Repo>(context, listen: false)
+                  .id}");
+              Navigator.of(context).pushReplacement(MaterialPageRoute(
+                  builder: (BuildContext context) => const GridviewBuilder()));
+              print("game created");
+          }
+        }
+      });
     } catch (e) {
       print(e.toString());
     }
@@ -77,11 +107,10 @@ class _CreateJoinGameScreenState extends State<CreateJoinGameScreen> {
     });
     gamesSnapshots.forEach((element) {
       for(int i=0;i<len;i++){
-        if(gameIdController.text == element.docs[i].data()["id"]){
+         if(gameIdController.text == element.docs[i].data()["id"]){
           print("uyuştu");
           print(element.docs[i].data()["id"]);
-          // if(_auth.currentUser != element.docs[i].data()["firstPlayer"]){
-          if(1==1){
+          if(_auth.currentUser != element.docs[i].data()["secondPlayer"] && element.docs[i].data()["secondPlayer"] == null){
             Firestore.collection("games").doc(element.docs[i].id).update({"secondPlayer":_auth.currentUser?.email.toString()});
             print("eklendi");
             Provider
