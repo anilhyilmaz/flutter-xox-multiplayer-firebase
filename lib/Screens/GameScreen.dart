@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../Class/Repo.dart';
 import '../Utils/ConstantStyles.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 class GridviewBuilder extends StatefulWidget {
   const GridviewBuilder({Key? key}) : super(key: key);
@@ -14,8 +15,7 @@ class GridviewBuilder extends StatefulWidget {
 
 class _GridviewBuilderState extends State<GridviewBuilder> {
   FirebaseFirestore Firestore = FirebaseFirestore.instance;
-  var finished,
-      gameCode,
+  var gameCode,
       id,
       firstPlayer,
       secondPlayer,
@@ -54,7 +54,6 @@ class _GridviewBuilderState extends State<GridviewBuilder> {
                 child: Column(
                   children: [
                     Text("code: $id"),
-                    Text("Username2: $secondPlayer")
                   ],
                 ),
               ),
@@ -85,10 +84,8 @@ class _GridviewBuilderState extends State<GridviewBuilder> {
                               itemCount: 9,
                               itemBuilder: (context, index) {
                                 return GestureDetector(
-                                  onTap: () => {
-                                    finished
-                                        ? print("game finished")
-                                        : changeboardIndex(index),
+                                  onTap: () async => {
+                                    controlofGameFinished(index, snapshot)
                                     //update board at index doesnt work atm.
                                   },
                                   child: Container(
@@ -114,17 +111,18 @@ class _GridviewBuilderState extends State<GridviewBuilder> {
               Flexible(
                   flex: 1,
                   child: Row(crossAxisAlignment: CrossAxisAlignment.end,mainAxisAlignment: MainAxisAlignment.end,children: [
-                    secondPlayerImage != null
-                        ? Image.network(
-                            "$secondPlayerImage",
-                            height: 50,
-                            width: 50,
-                          )
-                        : Text("f"),
-                    secondPlayer == null ? Text("Second player is waiting") : Text("$secondPlayer"),
-                  ])),
+                    secondPlayer != null
+                        ? Row(children: [Image.network(
+                      "$secondPlayerImage",
+                      height: 50,
+                      width: 50,
+                    ),Text("${secondPlayer}")],) : Text("Second player is  waiting")
+        ])),
             ])));
   }
+
+
+
 
   changeboardIndex(int index) async {
     if (mounted) {
@@ -134,13 +132,15 @@ class _GridviewBuilderState extends State<GridviewBuilder> {
           .update({"board": board});
     }
   }
-
-  getdata() {
-    print(firstPlayerImage);
+  controlofGameFinished(index,snapshot) async{
+   if(mounted){
+     await snapshot.data!["gameFinish"] == "true"
+         ? await Alert(context: context, title: "Game Finished", desc: "Game Finished.").show()
+         : changeboardIndex(index);
+   }
   }
 
   providerLoad() {
-    finished = Provider.of<Repo>(context, listen: false).isFinished;
     gameCode = Provider.of<Repo>(context, listen: false).gameCode;
     id = Provider.of<Repo>(context, listen: false).id;
     firstPlayerImage =
