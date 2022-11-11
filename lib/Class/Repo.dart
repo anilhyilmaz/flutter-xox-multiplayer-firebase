@@ -8,6 +8,8 @@ class Repo with ChangeNotifier{
   var gameCode;
   var id;
   var firstPlayer;
+  var firstPlayerImage;
+  var secondPlayerImage;
   var secondPlayer;
 
   changeText(int index){

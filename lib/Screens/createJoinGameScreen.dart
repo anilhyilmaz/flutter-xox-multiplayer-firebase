@@ -60,7 +60,7 @@ class _CreateJoinGameScreenState extends State<CreateJoinGameScreen> {
     final now = DateTime.now();
     try {
       FirebaseFirestore Firestore = FirebaseFirestore.instance;
-      Firestore.collection("games").add({"sira":"first_player","board":[2,2,2,2,2,2,2,2,2],"XorO":"X","id": id,"created_time":now,"firstPlayer":_auth.currentUser?.email.toString(),"secondPlayer":null,"gameFinish":"false"});
+      Firestore.collection("games").add({"firstPlayerImage":_auth.currentUser?.photoURL,"secondPlayerImage":null,"sira":"first_player","board":[2,2,2,2,2,2,2,2,2],"XorO":"X","id": id,"created_time":now,"firstPlayer":_auth.currentUser?.email.toString(),"secondPlayer":null,"gameFinish":"false"});
       var gamesSnapshots = Firestore.collection("games").snapshots();
       gamesSnapshots.forEach((element) {
         len = element.docs.length;
@@ -72,6 +72,15 @@ class _CreateJoinGameScreenState extends State<CreateJoinGameScreen> {
               Provider
                   .of<Repo>(context, listen: false)
                   .id = element.docs[i].data()["id"];
+            Provider
+                .of<Repo>(context, listen: false)
+                .board = element.docs[i].data()["board"];
+            Provider
+                .of<Repo>(context, listen: false)
+                .firstPlayerImage = element.docs[i].data()["firstPlayerImage"];
+            Provider
+                .of<Repo>(context, listen: false)
+                .secondPlayerImage = element.docs[i].data()["secondPlayerImage"];
               Provider
                   .of<Repo>(context, listen: false)
                   .gameCode = element.docs[i].id;
@@ -91,6 +100,7 @@ class _CreateJoinGameScreenState extends State<CreateJoinGameScreen> {
               Navigator.of(context).pushReplacement(MaterialPageRoute(
                   builder: (BuildContext context) => const GridviewBuilder()));
               print("game created");
+
           }
         }
       });
@@ -116,9 +126,16 @@ class _CreateJoinGameScreenState extends State<CreateJoinGameScreen> {
             Provider
                 .of<Repo>(context, listen: false)
                 .id = element.docs[i].data()["id"];
+
             Provider
                 .of<Repo>(context, listen: false)
                 .gameCode = element.docs[i].id;
+            Provider
+                .of<Repo>(context, listen: false)
+                .firstPlayerImage = element.docs[i].data()["firstPlayerImage"];
+            Provider
+                .of<Repo>(context, listen: false)
+                .secondPlayerImage = element.docs[i].data()["secondPlayerImage"];
             Provider
                 .of<Repo>(context, listen: false)
                 .firstPlayer = element.docs[i].data()["firstPlayer"];
