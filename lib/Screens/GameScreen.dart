@@ -21,7 +21,8 @@ class _GridviewBuilderState extends State<GridviewBuilder> {
       secondPlayer,
       board,
       firstPlayerImage,
-      secondPlayerImage;
+      secondPlayerImage,
+      gamestarted;
 
   @override
   void initState() {
@@ -40,15 +41,18 @@ class _GridviewBuilderState extends State<GridviewBuilder> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
               Flexible(
-                  flex: 1,
-                  child: Row(mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.start,children: [
-                    Image.network(
-                      "$firstPlayerImage",
-                      height: 50,
-                      width: 50,
-                    ),
-                    Text("$firstPlayer"),
-                  ])),
+                  flex: 2,
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Image.network(
+                          "$firstPlayerImage",
+                          height: 50,
+                          width: 50,
+                        ),
+                        Text("$firstPlayer"),
+                      ])),
               Flexible(
                 flex: 1,
                 child: Column(
@@ -59,7 +63,7 @@ class _GridviewBuilderState extends State<GridviewBuilder> {
               ),
               //board flexible widget
               Flexible(
-                  flex: 6,
+                  flex: 5,
                   child: StreamBuilder(
                       stream: Firestore.collection("games")
                           .doc(gameCode)
@@ -70,74 +74,92 @@ class _GridviewBuilderState extends State<GridviewBuilder> {
                             'No Data...',
                           );
                         } else {
-                          return Container(
-                            height: 300,
-                            width: 300,
-                            margin: const EdgeInsets.all(10),
-                            child: GridView.builder(
-                              gridDelegate:
-                                  const SliverGridDelegateWithMaxCrossAxisExtent(
-                                      maxCrossAxisExtent: 100,
-                                      childAspectRatio: 3 / 2,
-                                      crossAxisSpacing: 5,
-                                      mainAxisSpacing: 20),
-                              itemCount: 9,
-                              itemBuilder: (context, index) {
-                                return GestureDetector(
-                                  onTap: () async => {
-                                    controlofGameFinished(index, snapshot)
-                                    //update board at index doesnt work atm.
-                                  },
-                                  child: Container(
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                        color: Colors.amber,
-                                        borderRadius:
-                                            BorderRadius.circular(15)),
-                                    child: Text(
-                                        snapshot.data!["board"][index]
-                                                .toString() ??
-                                            " ",
-                                        style: TextStyle(
-                                            fontSize: constOsize.toDouble())),
+                          return Column(
+                            children: [
+                              Flexible(
+                                flex: 8,
+                                child: Container(
+                                  height: 300,
+                                  width: 300,
+                                  margin: const EdgeInsets.all(10),
+                                  child: GridView.builder(
+                                    gridDelegate:
+                                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                                            maxCrossAxisExtent: 100,
+                                            childAspectRatio: 3 / 2,
+                                            crossAxisSpacing: 5,
+                                            mainAxisSpacing: 20),
+                                    itemCount: 9,
+                                    itemBuilder: (context, index) {
+                                      return GestureDetector(
+                                        onTap: () async => {
+                                          controlofGameFinished(index, snapshot)
+                                        },
+                                        child: Container(
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                              color: Colors.amber,
+                                              borderRadius:
+                                                  BorderRadius.circular(15)),
+                                          child: Text(
+                                              snapshot.data!["board"][index]
+                                                      .toString() ??
+                                                  " ",
+                                              style: TextStyle(
+                                                  fontSize:
+                                                      constOsize.toDouble())),
+                                        ),
+                                      );
+                                    },
                                   ),
-                                );
-                              },
-                            ),
+                                ),
+                              ),
+                              Flexible(
+                                  flex: 1,
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      loadsecondPlayer(snapshot),
+                                    ],
+                                  ))
+                            ],
                           );
                         }
                       })),
               //second player information widget
-              Flexible(
-                  flex: 1,
-                  child: Row(crossAxisAlignment: CrossAxisAlignment.end,mainAxisAlignment: MainAxisAlignment.end,children: [
-                    secondPlayer != null
-                        ? Row(children: [Image.network(
-                      "$secondPlayerImage",
-                      height: 50,
-                      width: 50,
-                    ),Text("${secondPlayer}")],) : Text("Second player is  waiting")
-        ])),
             ])));
   }
 
-
-
-
   changeboardIndex(int index) async {
     if (mounted) {
-      Provider.of<Repo>(context, listen: false).changeText(index);
+      await Provider.of<Repo>(context, listen: false).changeText(index);
       return await Firestore.collection("games")
           .doc(gameCode)
           .update({"board": board});
     }
   }
-  controlofGameFinished(index,snapshot) async{
-   if(mounted){
-     await snapshot.data!["gameFinish"] == "true"
-         ? await Alert(context: context, title: "Game Finished", desc: "Game Finished.").show()
-         : changeboardIndex(index);
-   }
+
+  loadsecondPlayer(snapshot) {
+    if (mounted) {
+      return Text(snapshot.data!["secondPlayer"].toString());
+    }
+  }
+
+  controlofGameFinished(index, snapshot) async {
+    if (mounted) {
+      if(await snapshot.data!["gameFinish"] == "true" || await snapshot.data!["gamestarted"] == false){
+        return await Alert(
+            context: context,
+            title: "Game Finished",
+            desc: "Game Finished.")
+            .show();
+      }
+      else{
+        await changeboardIndex(index);
+      }
+    }
   }
 
   providerLoad() {
@@ -150,5 +172,6 @@ class _GridviewBuilderState extends State<GridviewBuilder> {
     firstPlayer = Provider.of<Repo>(context, listen: false).firstPlayer;
     secondPlayer = Provider.of<Repo>(context, listen: false).secondPlayer;
     board = Provider.of<Repo>(context, listen: false).board;
+    gamestarted = Provider.of<Repo>(context, listen: false).gamestarted;
   }
 }

@@ -60,7 +60,7 @@ class _CreateJoinGameScreenState extends State<CreateJoinGameScreen> {
     final now = DateTime.now();
     try {
       FirebaseFirestore Firestore = FirebaseFirestore.instance;
-      Firestore.collection("games").add({"firstPlayerImage":_auth.currentUser?.photoURL,"secondPlayerImage":null,"sira":"first_player","board":["","","","","","","","",""],"XorO":"X","id": id,"created_time":now,"firstPlayer":_auth.currentUser?.email.toString(),"secondPlayer":null,"gameFinish":"false"});
+      Firestore.collection("games").add({"gamestarted":false,"firstPlayerImage":_auth.currentUser?.photoURL,"secondPlayerImage":"","sira":"first_player","board":["","","","","","","","",""],"XorO":"X","id": id,"created_time":now,"firstPlayer":_auth.currentUser?.email.toString(),"secondPlayer":"","gameFinish":"false"});
       var gamesSnapshots = Firestore.collection("games").snapshots();
       gamesSnapshots.forEach((element) {
         len = element.docs.length;
@@ -75,6 +75,9 @@ class _CreateJoinGameScreenState extends State<CreateJoinGameScreen> {
             Provider
                 .of<Repo>(context, listen: false)
                 .board = element.docs[i].data()["board"];
+            Provider
+                .of<Repo>(context, listen: false)
+                .gamestarted = element.docs[i].data()["gamestarted"];
             Provider
                 .of<Repo>(context, listen: false)
                 .firstPlayerImage = element.docs[i].data()["firstPlayerImage"];
@@ -115,7 +118,7 @@ class _CreateJoinGameScreenState extends State<CreateJoinGameScreen> {
           print("uyuştu");
           print(element.docs[i].data()["id"]);
           if(_auth.currentUser != element.docs[i].data()["secondPlayer"] && element.docs[i].data()["secondPlayer"] == null){
-            Firestore.collection("games").doc(element.docs[i].id).update({"secondPlayer":_auth.currentUser?.email.toString(),"secondPlayerImage":_auth.currentUser?.photoURL});
+            Firestore.collection("games").doc(element.docs[i].id).update({"gamestarted":true,"secondPlayer":_auth.currentUser?.email.toString(),"secondPlayerImage":_auth.currentUser?.photoURL});
             print("eklendi");
             Provider
                 .of<Repo>(context, listen: false)
@@ -124,6 +127,9 @@ class _CreateJoinGameScreenState extends State<CreateJoinGameScreen> {
             Provider
                 .of<Repo>(context, listen: false)
                 .gameCode = element.docs[i].id;
+            Provider
+                .of<Repo>(context, listen: false)
+                .gamestarted = element.docs[i].data()["gamestarted"];
             Provider
                 .of<Repo>(context, listen: false)
                 .firstPlayerImage = element.docs[i].data()["firstPlayerImage"];
