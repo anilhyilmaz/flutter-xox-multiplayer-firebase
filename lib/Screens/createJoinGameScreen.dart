@@ -60,7 +60,7 @@ class _CreateJoinGameScreenState extends State<CreateJoinGameScreen> {
     final now = DateTime.now();
     try {
       FirebaseFirestore Firestore = FirebaseFirestore.instance;
-      Firestore.collection("games").add({"gamestarted":false,"firstPlayerImage":_auth.currentUser?.photoURL,"secondPlayerImage":"","sira":"first_player","board":["","","","","","","","",""],"XorO":"X","id": id,"created_time":now,"firstPlayer":_auth.currentUser?.email.toString(),"secondPlayer":"","gameFinish":"false"});
+      Firestore.collection("games").add({"gamestarted":false,"firstPlayerImage":_auth.currentUser?.photoURL,"secondPlayerImage":"","order":"firstplayer","board":["","","","","","","","",""],"firstplayer_move":"X","secondplayer_move":"O","id": id,"created_time":now,"firstPlayer":_auth.currentUser?.email.toString(),"secondPlayer":"","gameFinish":"false"});
       var gamesSnapshots = Firestore.collection("games").snapshots();
       gamesSnapshots.forEach((element) {
         len = element.docs.length;
@@ -117,7 +117,7 @@ class _CreateJoinGameScreenState extends State<CreateJoinGameScreen> {
          if(gameIdController.text == element.docs[i].data()["id"]){
           print("uyuştu");
           print(element.docs[i].data()["id"]);
-          if(_auth.currentUser != element.docs[i].data()["secondPlayer"] && element.docs[i].data()["secondPlayer"] == null){
+          if(_auth.currentUser != element.docs[i].data()["firstPlayer"] && element.docs[i].data()["secondPlayer"] == ""){
             Firestore.collection("games").doc(element.docs[i].id).update({"gamestarted":true,"secondPlayer":_auth.currentUser?.email.toString(),"secondPlayerImage":_auth.currentUser?.photoURL});
             print("eklendi");
             Provider

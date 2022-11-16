@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -23,6 +24,7 @@ class _GridviewBuilderState extends State<GridviewBuilder> {
       firstPlayerImage,
       secondPlayerImage,
       gamestarted;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   void initState() {
@@ -134,9 +136,9 @@ class _GridviewBuilderState extends State<GridviewBuilder> {
             ])));
   }
 
-  changeboardIndex(int index) async {
+  changeboardIndex(int index,move) async {
     if (mounted) {
-      await Provider.of<Repo>(context, listen: false).changeText(index);
+      await Provider.of<Repo>(context, listen: false).changeText(index,move);
       return await Firestore.collection("games")
           .doc(gameCode)
           .update({"board": board});
@@ -151,40 +153,29 @@ class _GridviewBuilderState extends State<GridviewBuilder> {
 
   controlofGameFinished(index, snapshot) async {
     if (mounted) {
+
       if (await snapshot.data!["gameFinish"] == "true" ||
-          await snapshot.data!["gamestarted"] == true) {
+          await snapshot.data!["gamestarted"] == false) {
         return await Alert(
             context: context,
             title: "Game Finished",
             desc: "Game Finished.")
             .show();
       }
-      else {
-        await changeboardIndex(index);
-        if((board[0] == "X" && board[1] == "X" && board[2] == "X") || (board[0] == "O" && board[1] == "O" && board[2] == "O")){
-          print("game finished");
-        }
-        if((board[3] == "X" && board[4] == "X" && board[5] == "X") || (board[3] == "O" && board[4] == "O" && board[5] == "O")){
-          print("game finished");
-        }
-        if((board[6] == "X" && board[7] == "X" && board[8] == "X") || board[6] == "O" && board[7] == "O" && board[8] == "O"){
-          print("game finished");
-        }
-        else if((board[0] == "X" && board[3] == "X" && board[6] == "X") || board[0] == "O" && board[3] == "O" && board[6] == "O"){
-          print("game finished");
-        }
-        else if((board[1] == "X" && board[4] == "X" && board[7] == "X") || (board[1] == "O" && board[4] == "O" && board[7] == "O")){
-          print("game finished");
-        }
-        else if((board[2] == "X" && board[5] == "X" && board[8] == "X") || (board[2] == "O" && board[5] == "O" && board[8] == "O")){
-          print("game finished");
-        }
-        else if((board[0] == "X" && board[4] == "X" && board[8] == "X") || (board[0] == "O" && board[4] == "O" && board[8] == "O")){
-          print("game finished");
-        }
-        else if((board[2] == "X" && board[4] == "X" && board[6] == "X") || (board[2] == "O" && board[4] == "O" && board[6] == "O")){
-          print("game finished");
-        }
+      else if(await snapshot.data!["order"] == "firstplayer" && _auth.currentUser?.email.toString() ==  await snapshot.data!["firstPlayer"]){
+
+        var move = "X";
+        boardcontrol(index,move);
+        return await Firestore.collection("games")
+            .doc(gameCode)
+            .update({"order": "secondplayer"});
+      }
+      else if(await snapshot.data!["order"] == "secondplayer" && _auth.currentUser?.email.toString() ==  await snapshot.data!["secondPlayer"]){
+        var move = "O";
+        boardcontrol(index,move);
+        return await Firestore.collection("games")
+            .doc(gameCode)
+            .update({"order": "firstplayer"});
       }
     }
   }
@@ -201,5 +192,58 @@ class _GridviewBuilderState extends State<GridviewBuilder> {
     secondPlayer = Provider.of<Repo>(context, listen: false).secondPlayer;
     board = Provider.of<Repo>(context, listen: false).board;
     gamestarted = Provider.of<Repo>(context, listen: false).gamestarted;
+  }
+  boardcontrol(int index,var move) async{
+    {
+      await changeboardIndex(index,move);
+      if((board[0] == "X" && board[1] == "X" && board[2] == "X") || (board[0] == "O" && board[1] == "O" && board[2] == "O")){
+        print("game finished");
+        return await Firestore.collection("games")
+            .doc(gameCode)
+            .update({"gameFinish": "true"});
+      }
+      if((board[3] == "X" && board[4] == "X" && board[5] == "X") || (board[3] == "O" && board[4] == "O" && board[5] == "O")){
+        print("game finished");
+        return await Firestore.collection("games")
+            .doc(gameCode)
+            .update({"gameFinish": "true"});
+      }
+      if((board[6] == "X" && board[7] == "X" && board[8] == "X") || board[6] == "O" && board[7] == "O" && board[8] == "O"){
+        print("game finished");
+        return await Firestore.collection("games")
+            .doc(gameCode)
+            .update({"gameFinish": "true"});
+      }
+      else if((board[0] == "X" && board[3] == "X" && board[6] == "X") || board[0] == "O" && board[3] == "O" && board[6] == "O"){
+        print("game finished");
+        return await Firestore.collection("games")
+            .doc(gameCode)
+            .update({"gameFinish": "true"});
+      }
+      else if((board[1] == "X" && board[4] == "X" && board[7] == "X") || (board[1] == "O" && board[4] == "O" && board[7] == "O")){
+        print("game finished");
+        return await Firestore.collection("games")
+            .doc(gameCode)
+            .update({"gameFinish": "true"});
+      }
+      else if((board[2] == "X" && board[5] == "X" && board[8] == "X") || (board[2] == "O" && board[5] == "O" && board[8] == "O")){
+        print("game finished");
+        return await Firestore.collection("games")
+            .doc(gameCode)
+            .update({"gameFinish": "true"});
+      }
+      else if((board[0] == "X" && board[4] == "X" && board[8] == "X") || (board[0] == "O" && board[4] == "O" && board[8] == "O")){
+        print("game finished");
+        return await Firestore.collection("games")
+            .doc(gameCode)
+            .update({"gameFinish": "true"});
+      }
+      else if((board[2] == "X" && board[4] == "X" && board[6] == "X") || (board[2] == "O" && board[4] == "O" && board[6] == "O")){
+        print("game finished");
+        return await Firestore.collection("games")
+            .doc(gameCode)
+            .update({"gameFinish": "true"});
+      }
+    }
   }
 }
