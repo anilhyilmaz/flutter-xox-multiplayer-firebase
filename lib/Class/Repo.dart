@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 
 class Repo with ChangeNotifier{
   bool isFinished = false;
-  List board = ["","","","","","","","",""];
+  List? board = ["","","","","","","","",""];
   var gameCode;
   var id;
   var firstPlayer;
@@ -14,7 +14,9 @@ class Repo with ChangeNotifier{
   var move;
 
   changeText(int index,move){
-    board[index] = move;
+    board![index] = move;
     notifyListeners();
+  }
+  updateboard(int index){
   }
 }

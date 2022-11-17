@@ -25,6 +25,7 @@ class _GridviewBuilderState extends State<GridviewBuilder> {
       secondPlayerImage,
       gamestarted;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  var deneme;
 
   @override
   void initState() {
@@ -65,83 +66,57 @@ class _GridviewBuilderState extends State<GridviewBuilder> {
               ),
               //board flexible widget
               Flexible(
-                  flex: 5,
-                  child: StreamBuilder(
-                      stream: Firestore.collection("games")
-                          .doc(gameCode)
-                          .snapshots(),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) {
-                          return Text(
-                            'No Data...',
-                          );
-                        } else {
-                          return Column(
-                            children: [
-                              Flexible(
-                                flex: 8,
-                                child: Container(
-                                  height: 300,
-                                  width: 300,
-                                  margin: const EdgeInsets.all(10),
-                                  child: GridView.builder(
-                                    gridDelegate:
-                                        const SliverGridDelegateWithMaxCrossAxisExtent(
-                                            maxCrossAxisExtent: 100,
-                                            childAspectRatio: 3 / 2,
-                                            crossAxisSpacing: 5,
-                                            mainAxisSpacing: 20),
-                                    itemCount: 9,
-                                    itemBuilder: (context, index) {
-                                      return GestureDetector(
-                                        onTap: () async => {
-                                          controlofGameFinished(index, snapshot),
-                                        },
-                                        child: Container(
-                                          alignment: Alignment.center,
-                                          decoration: BoxDecoration(
-                                              color: Colors.amber,
-                                              borderRadius:
-                                                  BorderRadius.circular(15)),
-                                          child: Text(
-                                              snapshot.data!["board"][index]
-                                                      .toString() ??
-                                                  " ",
-                                              style: TextStyle(
-                                                  fontSize:
-                                                      constOsize.toDouble())),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                              Flexible(
-                                  flex: 1,
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      loadsecondPlayer(snapshot),
-                                    ],
-                                  ))
-                            ],
-                          );
-                        }
-                      }
-                      )
-              ),
+                flex: 8,
+                child: StreamBuilder(
+                    stream:
+                        Firestore.collection("games").doc(gameCode).snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return Text(
+                          'No Data...',
+                        );
+                      } else {
+                        return Column(
+                          children: [
+                            Flexible(
+                              flex: 6,
+                              child: GridView.count(
+                                primary: false,
+                                padding: const EdgeInsets.all(20),
+                                crossAxisSpacing: 10,
+                                mainAxisSpacing: 10,
+                                crossAxisCount: 3,
+                                children: <Widget>[
+                                  buwidget(snapshot, 0),
+                                  buwidget(snapshot, 1),
+                                  buwidget(snapshot, 2),
+                                  buwidget(snapshot, 3),
+                                  buwidget(snapshot, 4),
+                                  buwidget(snapshot, 5),
+                                  buwidget(snapshot, 6),
+                                  buwidget(snapshot, 7),
+                                  buwidget(snapshot, 8),
 
+                                ],
+                              ),
+                            ),
+                            Flexible(flex: 2,child:Row(
+                              children: [loadsecondPlayer(snapshot)],
+                            ))
+                          ],
+                        );
+                      }
+                    }),
+              ),
             ])));
   }
 
-  changeboardIndex(int index,move) async {
+  changeboardIndex(int index, move) async {
     if (mounted) {
-      await Provider.of<Repo>(context, listen: false).changeText(index,move);
-      return await Firestore.collection("games")
-          .doc(gameCode)
-          .update({"board": board});
+      //this provider is used to understand that the game is over
+      Provider.of<Repo>(context, listen: false).changeText(index, move);
+      print("clicked button");
+      await Firestore.collection("games").doc(gameCode).update({index.toString():move});
     }
   }
 
@@ -151,96 +126,119 @@ class _GridviewBuilderState extends State<GridviewBuilder> {
     }
   }
 
+  buwidget(snapshot, var index) {
+    return GestureDetector(
+      onTap: () async => {
+        controlofGameFinished(index, snapshot),
+      },
+      child: Container(
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+            color: Colors.amber, borderRadius: BorderRadius.circular(15)),
+        child: Text(snapshot.data![index.toString()].toString(),
+            style: TextStyle(fontSize: constOsize.toDouble())),
+      ),
+    );
+  }
+
   controlofGameFinished(index, snapshot) async {
     if (mounted) {
-
       if (await snapshot.data!["gameFinish"] == "true" ||
           await snapshot.data!["gamestarted"] == false) {
-        return await Alert(
-            context: context,
-            title: "Game Finished",
-            desc: "Game Finished.")
+        return Alert(
+                context: context,
+                title: "Game Finished",
+                desc: "Game Finished.")
             .show();
       }
-      else if(await snapshot.data!["order"] == "firstplayer" && _auth.currentUser?.email.toString() ==  await snapshot.data!["firstPlayer"]){
-
+      if (mounted &&
+          await snapshot.data!["order"] == "firstplayer" &&
+          _auth.currentUser?.email.toString() ==
+              await snapshot.data!["firstPlayer"]) {
         var move = "X";
-        boardcontrol(index,move);
-        return await Firestore.collection("games")
+        await boardcontrol(index, move);
+        await Firestore.collection("games")
             .doc(gameCode)
             .update({"order": "secondplayer"});
-      }
-      else if(await snapshot.data!["order"] == "secondplayer" && _auth.currentUser?.email.toString() ==  await snapshot.data!["secondPlayer"]){
+      } else if (mounted &&
+          await snapshot.data!["order"] == "secondplayer" &&
+          _auth.currentUser?.email.toString() ==
+              await snapshot.data!["secondPlayer"]) {
         var move = "O";
-        boardcontrol(index,move);
-        return await Firestore.collection("games")
+        await boardcontrol(index, move);
+        await Firestore.collection("games")
             .doc(gameCode)
             .update({"order": "firstplayer"});
       }
     }
   }
 
-
   providerLoad() {
-    gameCode = Provider.of<Repo>(context, listen: false).gameCode;
-    id = Provider.of<Repo>(context, listen: false).id;
-    firstPlayerImage =
-        Provider.of<Repo>(context, listen: false).firstPlayerImage;
-    secondPlayerImage =
-        Provider.of<Repo>(context, listen: false).secondPlayerImage;
-    firstPlayer = Provider.of<Repo>(context, listen: false).firstPlayer;
-    secondPlayer = Provider.of<Repo>(context, listen: false).secondPlayer;
-    board = Provider.of<Repo>(context, listen: false).board;
-    gamestarted = Provider.of<Repo>(context, listen: false).gamestarted;
+    if (mounted) {
+      gameCode = Provider.of<Repo>(context, listen: false).gameCode;
+      id = Provider.of<Repo>(context, listen: false).id;
+      firstPlayerImage =
+          Provider.of<Repo>(context, listen: false).firstPlayerImage;
+      secondPlayerImage =
+          Provider.of<Repo>(context, listen: false).secondPlayerImage;
+      firstPlayer = Provider.of<Repo>(context, listen: false).firstPlayer;
+      secondPlayer = Provider.of<Repo>(context, listen: false).secondPlayer;
+      board = Provider.of<Repo>(context, listen: false).board;
+      gamestarted = Provider.of<Repo>(context, listen: false).gamestarted;
+    }
   }
-  boardcontrol(int index,var move) async{
-    {
-      await changeboardIndex(index,move);
-      if((board[0] == "X" && board[1] == "X" && board[2] == "X") || (board[0] == "O" && board[1] == "O" && board[2] == "O")){
+
+  boardcontrol(int index, var move) async {
+    if (mounted) {
+      await changeboardIndex(index, move);
+      if ((board[0] == "X" && board[1] == "X" && board[2] == "X") ||
+          (board[0] == "O" && board[1] == "O" && board[2] == "O")) {
         print("game finished");
-        return await Firestore.collection("games")
+        await Firestore.collection("games")
             .doc(gameCode)
             .update({"gameFinish": "true"});
       }
-      if((board[3] == "X" && board[4] == "X" && board[5] == "X") || (board[3] == "O" && board[4] == "O" && board[5] == "O")){
+      if ((board[3] == "X" && board[4] == "X" && board[5] == "X") ||
+          (board[3] == "O" && board[4] == "O" && board[5] == "O")) {
         print("game finished");
-        return await Firestore.collection("games")
+        await Firestore.collection("games")
             .doc(gameCode)
             .update({"gameFinish": "true"});
       }
-      if((board[6] == "X" && board[7] == "X" && board[8] == "X") || board[6] == "O" && board[7] == "O" && board[8] == "O"){
+      if ((board[6] == "X" && board[7] == "X" && board[8] == "X") ||
+          board[6] == "O" && board[7] == "O" && board[8] == "O") {
         print("game finished");
-        return await Firestore.collection("games")
+        await Firestore.collection("games")
             .doc(gameCode)
             .update({"gameFinish": "true"});
-      }
-      else if((board[0] == "X" && board[3] == "X" && board[6] == "X") || board[0] == "O" && board[3] == "O" && board[6] == "O"){
+      } else if ((board[0] == "X" && board[3] == "X" && board[6] == "X") ||
+          board[0] == "O" && board[3] == "O" && board[6] == "O") {
         print("game finished");
-        return await Firestore.collection("games")
+        await Firestore.collection("games")
             .doc(gameCode)
             .update({"gameFinish": "true"});
-      }
-      else if((board[1] == "X" && board[4] == "X" && board[7] == "X") || (board[1] == "O" && board[4] == "O" && board[7] == "O")){
+      } else if ((board[1] == "X" && board[4] == "X" && board[7] == "X") ||
+          (board[1] == "O" && board[4] == "O" && board[7] == "O")) {
         print("game finished");
-        return await Firestore.collection("games")
+        await Firestore.collection("games")
             .doc(gameCode)
             .update({"gameFinish": "true"});
-      }
-      else if((board[2] == "X" && board[5] == "X" && board[8] == "X") || (board[2] == "O" && board[5] == "O" && board[8] == "O")){
+      } else if ((board[2] == "X" && board[5] == "X" && board[8] == "X") ||
+          (board[2] == "O" && board[5] == "O" && board[8] == "O")) {
         print("game finished");
-        return await Firestore.collection("games")
+        await Firestore.collection("games")
             .doc(gameCode)
             .update({"gameFinish": "true"});
-      }
-      else if((board[0] == "X" && board[4] == "X" && board[8] == "X") || (board[0] == "O" && board[4] == "O" && board[8] == "O")){
+      } else if ((board[0] == "X" && board[4] == "X" && board[8] == "X") ||
+          (board[0] == "O" && board[4] == "O" && board[8] == "O")) {
         print("game finished");
-        return await Firestore.collection("games")
+        await Firestore.collection("games")
             .doc(gameCode)
             .update({"gameFinish": "true"});
-      }
-      else if((board[2] == "X" && board[4] == "X" && board[6] == "X") || (board[2] == "O" && board[4] == "O" && board[6] == "O")){
+      } else if ((board[2] == "X" && board[4] == "X" && board[6] == "X") ||
+          (board[2] == "O" && board[4] == "O" && board[6] == "O")) {
         print("game finished");
-        return await Firestore.collection("games")
+        await Firestore.collection("games")
             .doc(gameCode)
             .update({"gameFinish": "true"});
       }
