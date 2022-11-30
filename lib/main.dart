@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdeneme/Class/Repo.dart';
 import 'package:flutterdeneme/Screens/MainPage.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  WidgetsFlutterBinding.ensureInitialized();
+  MobileAds.instance.initialize();
   runApp(ChangeNotifierProvider<Repo>(
       create: (create) => Repo(), child: const MyApp()));
 }
@@ -18,7 +21,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: "gg",
+      title: "Main",
       home: MyHomePage(
         title: 'Home Page',
       ),
@@ -27,7 +30,10 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
+
   const MyHomePage({super.key, required this.title});
+
+
 
   final String title;
 
@@ -37,12 +43,13 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
+
   @override
   Widget build(BuildContext context) {
 
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: AppBar(centerTitle: true,
         title: Text(widget.title),
       ),
       body: Center(

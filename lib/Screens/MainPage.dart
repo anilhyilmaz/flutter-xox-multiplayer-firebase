@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutterdeneme/Screens/signin_signup.dart';
+import 'package:flutterdeneme/Screens/usernameScreen.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);
@@ -11,7 +11,7 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
-    return Center(child: SignInScreen(),);
+    return Center(child: usernameScreen(),);
   }
 
 }

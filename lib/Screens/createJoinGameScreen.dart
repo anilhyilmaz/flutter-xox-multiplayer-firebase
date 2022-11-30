@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../Class/Repo.dart';
 import '../Utils/CreateRandomID.dart';
 import 'GameScreen.dart';
@@ -17,15 +15,23 @@ class CreateJoinGameScreen extends StatefulWidget {
 
 
 var gameIdController = TextEditingController();
-final FirebaseAuth _auth = FirebaseAuth.instance;
-
+var username;
 
 
 class _CreateJoinGameScreenState extends State<CreateJoinGameScreen> {
 
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    username = Provider
+        .of<Repo>(context, listen: false)
+        .username;
+  }
 
   @override
   Widget build(BuildContext context) {
+
 
 
     return Scaffold(appBar: AppBar(title: Text("Create or Join Game Screen"),centerTitle: true,),body: Center(
@@ -62,7 +68,7 @@ class _CreateJoinGameScreenState extends State<CreateJoinGameScreen> {
       final now = DateTime.now();
       try {
         FirebaseFirestore Firestore = FirebaseFirestore.instance;
-        await Firestore.collection("games").add({"gamestarted":false,"firstPlayerImage":_auth.currentUser?.photoURL,"secondPlayerImage":"","order":"firstplayer","0":"","1":"","2":"","3":"","4":"","5":"","6":"","7":"","8":"","firstplayer_move":"X","secondplayer_move":"O","id": id,"created_time":now,"firstPlayer":_auth.currentUser?.email.toString(),"secondPlayer":"","gameFinish":"false"});
+        await Firestore.collection("games").add({"winner":"","gamestarted":false,"order":"firstplayer","0":"","1":"","2":"","3":"","4":"","5":"","6":"","7":"","8":"","firstplayer_move":"X","secondplayer_move":"O","id": id,"created_time":now,"firstPlayer":username,"secondPlayer":"","gameFinish":"false"});
         var gamesSnapshots = await Firestore.collection("games").snapshots();
         gamesSnapshots.forEach((element) {
           len = element.docs.length;
@@ -74,9 +80,6 @@ class _CreateJoinGameScreenState extends State<CreateJoinGameScreen> {
               Provider
                   .of<Repo>(context, listen: false)
                   .id = await element.docs[i].data()["id"];
-              // Provider
-              //     .of<Repo>(context, listen: false)
-              //     .board = await element.docs[i].data()["board"];
               Provider
                   .of<Repo>(context, listen: false)
                   .gamestarted = await element.docs[i].data()["gamestarted"];
@@ -97,7 +100,7 @@ class _CreateJoinGameScreenState extends State<CreateJoinGameScreen> {
                   .of<Repo>(context, listen: false)
                   .id}");
               Navigator.of(context).pushReplacement(MaterialPageRoute(
-                  builder: (BuildContext context) =>  GridviewBuilder()));
+                  builder: (BuildContext context) =>  GameScreen()));
               print("game created");
 
             }
@@ -121,13 +124,12 @@ class _CreateJoinGameScreenState extends State<CreateJoinGameScreen> {
           if(gameIdController.text == await element.docs[i].data()["id"]){
             print("uyuştu");
             print(element.docs[i].data()["id"]);
-            if(_auth.currentUser != await element.docs[i].data()["firstPlayer"] && await element.docs[i].data()["secondPlayer"] == ""){
-              await Firestore.collection("games").doc(element.docs[i].id).update({"gamestarted":true,"secondPlayer":_auth.currentUser?.email.toString(),"secondPlayerImage":_auth.currentUser?.photoURL});
+            if(await element.docs[i].data()["secondPlayer"] == ""){
+              await Firestore.collection("games").doc(element.docs[i].id).update({"gamestarted":true,"secondPlayer":username});
               print("eklendi");
               Provider
                   .of<Repo>(context, listen: false)
                   .id = await element.docs[i].data()["id"];
-
               Provider
                   .of<Repo>(context, listen: false)
                   .gameCode =element.docs[i].id;
@@ -136,22 +138,13 @@ class _CreateJoinGameScreenState extends State<CreateJoinGameScreen> {
                   .gamestarted =await element.docs[i].data()["gamestarted"];
               Provider
                   .of<Repo>(context, listen: false)
-                  .firstPlayerImage =await element.docs[i].data()["firstPlayerImage"];
-              Provider
-                  .of<Repo>(context, listen: false)
-                  .secondPlayerImage =_auth.currentUser?.photoURL;
-              Provider
-                  .of<Repo>(context, listen: false)
                   .firstPlayer =await element.docs[i].data()["firstPlayer"];
-              Provider
-                  .of<Repo>(context, listen: false)
-                  .secondPlayer =_auth.currentUser?.email;
               print(Provider
                   .of<Repo>(context, listen: false)
                   .secondPlayer);
 
               Navigator.of(context).pushReplacement(MaterialPageRoute(
-                  builder: (BuildContext context) => GridviewBuilder()));
+                  builder: (BuildContext context) => GameScreen()));
             }
           }
         }

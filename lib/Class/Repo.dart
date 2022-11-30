@@ -12,11 +12,10 @@ class Repo with ChangeNotifier{
   var secondPlayer;
   bool gamestarted = false;
   var move;
+  var username;
 
   changeText(int index,move){
     board![index] = move;
     notifyListeners();
-  }
-  updateboard(int index){
   }
 }

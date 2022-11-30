@@ -1,18 +1,27 @@
 {
   "project_info": {
     "project_number": "815881658999",
+    "firebase_url": "https://xox-multiplayer-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "xox-multiplayer",
     "storage_bucket": "xox-multiplayer.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:815881658999:android:a137e31c4019f60ef89c72",
+        "mobilesdk_app_id": "1:815881658999:android:7715ec77a81100f1f89c72",
         "android_client_info": {
-          "package_name": "com.example.flutterdeneme"
+          "package_name": "com.xoxx.xoxx"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "815881658999-0943nub3kepbt29b28bvrsvckg65cjvk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.xoxx.xoxx",
+            "certificate_hash": "af3aa7f9ebe6d870af44374a299aba51e8dd18bb"
+          }
+        },
         {
           "client_id": "815881658999-18d7n1t0ud9ggpmmgkjkgoe8eqa54qsh.apps.googleusercontent.com",
           "client_type": 3

@@ -1,20 +1,21 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import '../Class/Repo.dart';
 import '../Utils/ConstantStyles.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
+import 'createJoinGameScreen.dart';
 
-class GridviewBuilder extends StatefulWidget {
-  const GridviewBuilder({Key? key}) : super(key: key);
+class GameScreen extends StatefulWidget {
+  const GameScreen({Key? key}) : super(key: key);
 
   @override
-  State<GridviewBuilder> createState() => _GridviewBuilderState();
+  State<GameScreen> createState() => _GameScreenState();
 }
 
-class _GridviewBuilderState extends State<GridviewBuilder> {
+class _GameScreenState extends State<GameScreen> {
   FirebaseFirestore Firestore = FirebaseFirestore.instance;
   var gameCode,
       id,
@@ -24,43 +25,39 @@ class _GridviewBuilderState extends State<GridviewBuilder> {
       firstPlayerImage,
       secondPlayerImage,
       gamestarted;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  var deneme;
+  final AdSize adSize = AdSize(height: 300, width: 50);
+  late final BannerAd myBanner;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    WidgetsFlutterBinding.ensureInitialized();
+    MobileAds.instance.initialize();
     providerLoad();
+    myBanner = BannerAd(
+      adUnitId: "_ca-app-pub-4109178583091990/6357354391",
+      size: adSize,
+      request: AdRequest(),
+      listener: BannerAdListener(),
+    );
+    myBanner.load();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text("Game Screen")),
+        appBar: AppBar(centerTitle: true, title: Text("Game Screen")),
         body: Center(
             child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
               Flexible(
-                  flex: 2,
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Image.network(
-                          "$firstPlayerImage",
-                          height: 50,
-                          width: 50,
-                        ),
-                        Text("$firstPlayer"),
-                      ])),
-              Flexible(
                 flex: 1,
                 child: Column(
                   children: [
-                    Text("code: $id"),
+                    Text("Game code: $id"),
                   ],
                 ),
               ),
@@ -73,11 +70,32 @@ class _GridviewBuilderState extends State<GridviewBuilder> {
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
                         return Text(
-                          'No Data...',
+                          'Loading',
                         );
                       } else {
                         return Column(
                           children: [
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text("Player1: $firstPlayer"),
+                                loadsecondPlayer(snapshot),
+                              ],
+                            ),
+                            Container(child: winner(snapshot)),
+                            Container(
+                              child: Flexible(
+                                      child: OutlinedButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pushReplacement(
+                                                MaterialPageRoute(
+                                                    builder: (BuildContext
+                                                            context) =>
+                                                        CreateJoinGameScreen()));
+                                          },
+                                          child: Text("New Game")))
+                            ),
                             Flexible(
                               flex: 6,
                               child: GridView.count(
@@ -87,22 +105,24 @@ class _GridviewBuilderState extends State<GridviewBuilder> {
                                 mainAxisSpacing: 10,
                                 crossAxisCount: 3,
                                 children: <Widget>[
-                                  buwidget(snapshot, 0),
-                                  buwidget(snapshot, 1),
-                                  buwidget(snapshot, 2),
-                                  buwidget(snapshot, 3),
-                                  buwidget(snapshot, 4),
-                                  buwidget(snapshot, 5),
-                                  buwidget(snapshot, 6),
-                                  buwidget(snapshot, 7),
-                                  buwidget(snapshot, 8),
-
+                                  gamebuttoncontainer(snapshot, 0),
+                                  gamebuttoncontainer(snapshot, 1),
+                                  gamebuttoncontainer(snapshot, 2),
+                                  gamebuttoncontainer(snapshot, 3),
+                                  gamebuttoncontainer(snapshot, 4),
+                                  gamebuttoncontainer(snapshot, 5),
+                                  gamebuttoncontainer(snapshot, 6),
+                                  gamebuttoncontainer(snapshot, 7),
+                                  gamebuttoncontainer(snapshot, 8),
                                 ],
                               ),
                             ),
-                            Flexible(flex: 2,child:Row(
-                              children: [loadsecondPlayer(snapshot)],
-                            ))
+                            Flexible(child: Container(
+                              alignment: Alignment.center,
+                              child: AdWidget(ad: myBanner,),
+                              width: 300,
+                              height: 50,
+                            ),)
                           ],
                         );
                       }
@@ -116,22 +136,32 @@ class _GridviewBuilderState extends State<GridviewBuilder> {
       //this provider is used to understand that the game is over
       Provider.of<Repo>(context, listen: false).changeText(index, move);
       print("clicked button");
-      await Firestore.collection("games").doc(gameCode).update({index.toString():move});
+      await Firestore.collection("games")
+          .doc(gameCode)
+          .update({index.toString(): move});
     }
   }
 
   loadsecondPlayer(snapshot) {
     if (mounted) {
-      return Text(snapshot.data!["secondPlayer"].toString());
+      return Text("Player2: " + snapshot.data!["secondPlayer"].toString());
     }
   }
 
-  buwidget(snapshot, var index) {
+  winner(snapshot) {
+    if (mounted) {
+      if (snapshot.data!["winner"].toString() == null) {}
+    }
+  }
+
+  gamebuttoncontainer(snapshot, var index) {
     return GestureDetector(
       onTap: () async => {
+        print("clicked"),
         controlofGameFinished(index, snapshot),
       },
       child: Container(
+        padding: EdgeInsets.only(bottom: 15),
         alignment: Alignment.center,
         decoration: BoxDecoration(
             color: Colors.amber, borderRadius: BorderRadius.circular(15)),
@@ -143,18 +173,21 @@ class _GridviewBuilderState extends State<GridviewBuilder> {
 
   controlofGameFinished(index, snapshot) async {
     if (mounted) {
-      if (await snapshot.data!["gameFinish"] == "true" ||
-          await snapshot.data!["gamestarted"] == false) {
+      if (await snapshot.data!["gameFinish"] == "true") {
+        return Alert(context: context, title: "Game", desc: "Game Finished.")
+            .show();
+      }
+      if (await snapshot.data!["gamestarted"] == false) {
         return Alert(
                 context: context,
-                title: "Game Finished",
-                desc: "Game Finished.")
+                title: "Game did not start",
+                desc: "waiting opponent")
             .show();
       }
       if (mounted &&
           await snapshot.data!["order"] == "firstplayer" &&
-          _auth.currentUser?.email.toString() ==
-              await snapshot.data!["firstPlayer"]) {
+          username == await snapshot.data!["firstPlayer"] &&
+          snapshot.data![index.toString()] == "") {
         var move = "X";
         await boardcontrol(index, move);
         await Firestore.collection("games")
@@ -162,8 +195,8 @@ class _GridviewBuilderState extends State<GridviewBuilder> {
             .update({"order": "secondplayer"});
       } else if (mounted &&
           await snapshot.data!["order"] == "secondplayer" &&
-          _auth.currentUser?.email.toString() ==
-              await snapshot.data!["secondPlayer"]) {
+          username == await snapshot.data!["secondPlayer"] &&
+          snapshot.data![index.toString()] == "") {
         var move = "O";
         await boardcontrol(index, move);
         await Firestore.collection("games")
@@ -191,56 +224,92 @@ class _GridviewBuilderState extends State<GridviewBuilder> {
   boardcontrol(int index, var move) async {
     if (mounted) {
       await changeboardIndex(index, move);
-      if ((board[0] == "X" && board[1] == "X" && board[2] == "X") ||
-          (board[0] == "O" && board[1] == "O" && board[2] == "O")) {
+      if (board[0] == "X" && board[1] == "X" && board[2] == "X") {
         print("game finished");
         await Firestore.collection("games")
             .doc(gameCode)
-            .update({"gameFinish": "true"});
+            .update({"gameFinish": "true", "winner": "Player1"});
       }
-      if ((board[3] == "X" && board[4] == "X" && board[5] == "X") ||
-          (board[3] == "O" && board[4] == "O" && board[5] == "O")) {
+      if (board[0] == "O" && board[1] == "O" && board[2] == "O") {
         print("game finished");
         await Firestore.collection("games")
             .doc(gameCode)
-            .update({"gameFinish": "true"});
+            .update({"gameFinish": "true", "winner": "Player2"});
       }
-      if ((board[6] == "X" && board[7] == "X" && board[8] == "X") ||
-          board[6] == "O" && board[7] == "O" && board[8] == "O") {
+
+      if (board[3] == "X" && board[4] == "X" && board[5] == "X") {
         print("game finished");
         await Firestore.collection("games")
             .doc(gameCode)
-            .update({"gameFinish": "true"});
-      } else if ((board[0] == "X" && board[3] == "X" && board[6] == "X") ||
-          board[0] == "O" && board[3] == "O" && board[6] == "O") {
+            .update({"gameFinish": "true", "winner": "Player1"});
+      }
+      if (board[3] == "O" && board[4] == "O" && board[5] == "O") {
         print("game finished");
         await Firestore.collection("games")
             .doc(gameCode)
-            .update({"gameFinish": "true"});
-      } else if ((board[1] == "X" && board[4] == "X" && board[7] == "X") ||
-          (board[1] == "O" && board[4] == "O" && board[7] == "O")) {
+            .update({"gameFinish": "true", "winner": "Player2"});
+      }
+      if (board[6] == "X" && board[7] == "X" && board[8] == "X") {
         print("game finished");
         await Firestore.collection("games")
             .doc(gameCode)
-            .update({"gameFinish": "true"});
-      } else if ((board[2] == "X" && board[5] == "X" && board[8] == "X") ||
-          (board[2] == "O" && board[5] == "O" && board[8] == "O")) {
+            .update({"gameFinish": "true", "winner": "Player1"});
+      }
+      if (board[6] == "O" && board[7] == "O" && board[8] == "O") {
         print("game finished");
         await Firestore.collection("games")
             .doc(gameCode)
-            .update({"gameFinish": "true"});
-      } else if ((board[0] == "X" && board[4] == "X" && board[8] == "X") ||
-          (board[0] == "O" && board[4] == "O" && board[8] == "O")) {
+            .update({"gameFinish": "true", "winner": "Player2"});
+      } else if (board[0] == "X" && board[3] == "X" && board[6] == "X") {
         print("game finished");
         await Firestore.collection("games")
             .doc(gameCode)
-            .update({"gameFinish": "true"});
-      } else if ((board[2] == "X" && board[4] == "X" && board[6] == "X") ||
-          (board[2] == "O" && board[4] == "O" && board[6] == "O")) {
+            .update({"gameFinish": "true", "winner": "Player1"});
+      } else if (board[0] == "O" && board[3] == "O" && board[6] == "O") {
         print("game finished");
         await Firestore.collection("games")
             .doc(gameCode)
-            .update({"gameFinish": "true"});
+            .update({"gameFinish": "true", "winner": "Player2"});
+      } else if (board[1] == "X" && board[4] == "X" && board[7] == "X") {
+        print("game finished");
+        await Firestore.collection("games")
+            .doc(gameCode)
+            .update({"gameFinish": "true", "winner": "Player1"});
+      } else if (board[1] == "O" && board[4] == "O" && board[7] == "O") {
+        print("game finished");
+        await Firestore.collection("games")
+            .doc(gameCode)
+            .update({"gameFinish": "true", "winner": "Player2"});
+      } else if (board[2] == "X" && board[5] == "X" && board[8] == "X") {
+        print("game finished");
+        await Firestore.collection("games")
+            .doc(gameCode)
+            .update({"gameFinish": "true", "winner": "Player1"});
+      } else if (board[2] == "O" && board[5] == "O" && board[8] == "O") {
+        print("game finished");
+        await Firestore.collection("games")
+            .doc(gameCode)
+            .update({"gameFinish": "true", "winner": "Player2"});
+      } else if (board[0] == "X" && board[4] == "X" && board[8] == "X") {
+        print("game finished");
+        await Firestore.collection("games")
+            .doc(gameCode)
+            .update({"gameFinish": "true", "winner": "Player1"});
+      } else if (board[0] == "O" && board[4] == "O" && board[8] == "O") {
+        print("game finished");
+        await Firestore.collection("games")
+            .doc(gameCode)
+            .update({"gameFinish": "true", "winner": "Player2"});
+      } else if (board[2] == "X" && board[4] == "X" && board[6] == "X") {
+        print("game finished");
+        await Firestore.collection("games")
+            .doc(gameCode)
+            .update({"gameFinish": "true", "winner": "Player1"});
+      } else if (board[2] == "O" && board[4] == "O" && board[6] == "O") {
+        print("game finished");
+        await Firestore.collection("games")
+            .doc(gameCode)
+            .update({"gameFinish": "true", "winner": "Player2"});
       }
     }
   }
