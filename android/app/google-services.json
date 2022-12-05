@@ -1,42 +1,33 @@
 {
   "project_info": {
-    "project_number": "815881658999",
-    "firebase_url": "https://xox-multiplayer-default-rtdb.europe-west1.firebasedatabase.app",
-    "project_id": "xox-multiplayer",
-    "storage_bucket": "xox-multiplayer.appspot.com"
+    "project_number": "26789246795",
+    "project_id": "xoxfluttermultiplayer",
+    "storage_bucket": "xoxfluttermultiplayer.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:815881658999:android:7715ec77a81100f1f89c72",
+        "mobilesdk_app_id": "1:26789246795:android:ef160755d6c3cecd86dace",
         "android_client_info": {
           "package_name": "com.xoxx.xoxx"
         }
       },
       "oauth_client": [
         {
-          "client_id": "815881658999-0943nub3kepbt29b28bvrsvckg65cjvk.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.xoxx.xoxx",
-            "certificate_hash": "af3aa7f9ebe6d870af44374a299aba51e8dd18bb"
-          }
-        },
-        {
-          "client_id": "815881658999-18d7n1t0ud9ggpmmgkjkgoe8eqa54qsh.apps.googleusercontent.com",
+          "client_id": "26789246795-0jtpmehdmttti19ffds24b2qpkn6ldog.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAfx14uOYUfke15Qzr_O9NFYeXe9caqIMM"
+          "current_key": "AIzaSyCqWu21BWBPec8IgALdi6U71j1TYUpc7rk"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "815881658999-18d7n1t0ud9ggpmmgkjkgoe8eqa54qsh.apps.googleusercontent.com",
+              "client_id": "26789246795-0jtpmehdmttti19ffds24b2qpkn6ldog.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

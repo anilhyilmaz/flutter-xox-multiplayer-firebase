@@ -1,4 +1,4 @@
-package com.example.flutterdeneme
+package com.xoxx.xoxx
 
 import io.flutter.embedding.android.FlutterActivity
 
