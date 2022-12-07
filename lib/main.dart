@@ -7,9 +7,8 @@ import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  WidgetsFlutterBinding.ensureInitialized();
   MobileAds.instance.initialize();
+  await Firebase.initializeApp();
   runApp(ChangeNotifierProvider<Repo>(
       create: (create) => Repo(), child: const MyApp()));
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutterdeneme/Utils/ad_helper.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
@@ -26,22 +27,40 @@ class _GameScreenState extends State<GameScreen> {
       secondPlayerImage,
       gamestarted;
   final AdSize adSize = AdSize(height: 300, width: 50);
-  late final BannerAd myBanner;
+  BannerAd? _bannerAd;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    WidgetsFlutterBinding.ensureInitialized();
-    MobileAds.instance.initialize();
     providerLoad();
-    myBanner = BannerAd(
-      adUnitId: "_ca-app-pub-4109178583091990/6357354391",
-      size: adSize,
+    _initGoogleMobileAds();
+    BannerAd(
+      adUnitId: AdHelper.bannerAdUnitId,
       request: AdRequest(),
-      listener: BannerAdListener(),
-    );
-    myBanner.load();
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _bannerAd = ad as BannerAd;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          ad.dispose();
+        },
+      ),
+    ).load();
+  }
+  Future<InitializationStatus> _initGoogleMobileAds() {
+    // TODO: Initialize Google Mobile Ads SDK
+    return MobileAds.instance.initialize();
+  }
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _bannerAd?.dispose();
   }
 
   @override
@@ -53,82 +72,85 @@ class _GameScreenState extends State<GameScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-              Flexible(
-                flex: 1,
-                child: Column(
-                  children: [
-                    Text("Game code: $id"),
-                  ],
-                ),
-              ),
-              //board flexible widget
-              Flexible(
-                flex: 8,
-                child: StreamBuilder(
-                    stream:
+                  Flexible(
+                    flex: 1,
+                    child: Column(
+                      children: [
+                        Text("Game code: $id"),
+                      ],
+                    ),
+                  ),
+                  //board flexible widget
+                  Flexible(
+                    flex: 19,
+                    child: StreamBuilder(
+                        stream:
                         Firestore.collection("games").doc(gameCode).snapshots(),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
-                        return Text(
-                          'Loading',
-                        );
-                      } else {
-                        return Column(
-                          children: [
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return Text(
+                              'Loading',
+                            );
+                          } else {
+                            return Column(
                               children: [
-                                Text("Player1: $firstPlayer"),
-                                loadsecondPlayer(snapshot),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text("Player1: $firstPlayer"),
+                                    loadsecondPlayer(snapshot),
+                                  ],
+                                ),
+                                Container(child: winner(snapshot)),
+                                Container(
+                                    child: Flexible(
+                                        child: OutlinedButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pushReplacement(
+                                                  MaterialPageRoute(
+                                                      builder: (BuildContext
+                                                      context) =>
+                                                          CreateJoinGameScreen()));
+                                            },
+                                            child: Text("New Game")))
+                                ),
+                                Flexible(
+                                  flex: 6,
+                                  child: GridView.count(
+                                    primary: false,
+                                    padding: const EdgeInsets.all(20),
+                                    crossAxisSpacing: 10,
+                                    mainAxisSpacing: 10,
+                                    crossAxisCount: 3,
+                                    children: <Widget>[
+                                      gamebuttoncontainer(snapshot, 0),
+                                      gamebuttoncontainer(snapshot, 1),
+                                      gamebuttoncontainer(snapshot, 2),
+                                      gamebuttoncontainer(snapshot, 3),
+                                      gamebuttoncontainer(snapshot, 4),
+                                      gamebuttoncontainer(snapshot, 5),
+                                      gamebuttoncontainer(snapshot, 6),
+                                      gamebuttoncontainer(snapshot, 7),
+                                      gamebuttoncontainer(snapshot, 8),
+                                    ],
+                                  ),
+                                ),
+                                if (_bannerAd != null)
+                                  Flexible(flex: 1,child: Align(
+                                    alignment: Alignment.topCenter,
+                                    child: Container(
+                                      width: _bannerAd!.size.width.toDouble(),
+                                      height: _bannerAd!.size.height.toDouble(),
+                                      child: AdWidget(ad: _bannerAd!),
+                                    ),
+                                  ),)
                               ],
-                            ),
-                            Container(child: winner(snapshot)),
-                            Container(
-                              child: Flexible(
-                                      child: OutlinedButton(
-                                          onPressed: () {
-                                            Navigator.of(context).pushReplacement(
-                                                MaterialPageRoute(
-                                                    builder: (BuildContext
-                                                            context) =>
-                                                        CreateJoinGameScreen()));
-                                          },
-                                          child: Text("New Game")))
-                            ),
-                            Flexible(
-                              flex: 6,
-                              child: GridView.count(
-                                primary: false,
-                                padding: const EdgeInsets.all(20),
-                                crossAxisSpacing: 10,
-                                mainAxisSpacing: 10,
-                                crossAxisCount: 3,
-                                children: <Widget>[
-                                  gamebuttoncontainer(snapshot, 0),
-                                  gamebuttoncontainer(snapshot, 1),
-                                  gamebuttoncontainer(snapshot, 2),
-                                  gamebuttoncontainer(snapshot, 3),
-                                  gamebuttoncontainer(snapshot, 4),
-                                  gamebuttoncontainer(snapshot, 5),
-                                  gamebuttoncontainer(snapshot, 6),
-                                  gamebuttoncontainer(snapshot, 7),
-                                  gamebuttoncontainer(snapshot, 8),
-                                ],
-                              ),
-                            ),
-                            Flexible(child: Container(
-                              alignment: Alignment.center,
-                              child: AdWidget(ad: myBanner,),
-                              width: 300,
-                              height: 50,
-                            ),)
-                          ],
-                        );
-                      }
-                    }),
-              ),
-            ])));
+                            );
+                          }
+                        }),
+                  ),
+                ])));
   }
 
   changeboardIndex(int index, move) async {
@@ -179,9 +201,9 @@ class _GameScreenState extends State<GameScreen> {
       }
       if (await snapshot.data!["gamestarted"] == false) {
         return Alert(
-                context: context,
-                title: "Game did not start",
-                desc: "waiting opponent")
+            context: context,
+            title: "Game did not start",
+            desc: "waiting opponent")
             .show();
       }
       if (mounted &&
